@@ -3,13 +3,17 @@
   "version": "5.0.0",
   "description": "A WhatsApp Bot Created By JawadTechX",
   "main": "index.js",
+  "engines": {
+    "node": ">=20.x",
+    "npm": ">=10.x"
+  },
   "scripts": {
     "start": "pm2 start index.js --deep-monitoring --attach --name KHAN-MD",
     "stop": "pm2 stop KHAN-MD",
     "restart": "pm2 restart KHAN-MD"
   },
   "dependencies": {
-    "@whiskeysockets/baileys": "github:EdderBot02/bail",
+    "@whiskeysockets/baileys": "npm:baileys-pro@latest",
     "@adiwajshing/keyed-db": "^0.2.4",
     "@dark-yasiya/yt-dl.js": "1.0.5",
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
@@ -47,3 +51,4 @@
     "sqlite3": "^5.1.7"
   }
 }
+
