@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">System32 WB logo</title><desc id="desc">A minimal forest-green kernel emblem with a sage leaf and connected node.</desc>
+<rect width="512" height="512" rx="132" fill="#193D33"/>
+<path d="M256 91c-91 0-165 74-165 165s74 165 165 165 165-74 165-165S347 91 256 91Z" fill="none" stroke="#315D4D" stroke-width="10"/>
+<path d="M256 350c-7-62 12-121 60-174" fill="none" stroke="#65AAA7" stroke-width="17" stroke-linecap="round"/>
+<path d="M257 285c-52 5-91-12-112-53 47-17 89-11 112 53Z" fill="#A8C7B9"/>
+<path d="M297 223c-2-49 21-88 69-111 12 47-8 87-69 111Z" fill="#65AAA7"/>
+<circle cx="256" cy="350" r="15" fill="#F8FAF9"/>
+<path d="M177 390h158" stroke="#A8C7B9" stroke-width="10" stroke-linecap="round" opacity=".75"/>
+</svg>
