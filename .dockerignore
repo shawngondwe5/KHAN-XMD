@@ -1,0 +1,12 @@
+node_modules
+npm-debug.log
+.git
+.gitignore
+sessions
+config.env
+.env
+store
+temp
+*.log
+DEPLOY.md
+README.md

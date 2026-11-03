@@ -11,7 +11,7 @@ const AntiDelDB = DATABASE.define('AntiDelete', {
     },
     status: {
         type: DataTypes.BOOLEAN,
-        defaultValue: config.ANTI_DELETE === "true" || true, // Properly convert string to boolean
+        defaultValue: config.ANTI_DELETE === "true", // Properly convert string to boolean
     },
 }, {
     tableName: 'antidelete',
@@ -45,7 +45,7 @@ async function initializeAntiDeleteSettings() {
             await AntiDelDB.findOrCreate({
                 where: { id: 1 },
                 defaults: { 
-                    status: config.ANTI_DELETE === "true" || true 
+                    status: config.ANTI_DELETE === "true" 
                 },
             });
         }
@@ -56,7 +56,7 @@ async function initializeAntiDeleteSettings() {
             await AntiDelDB.sync();
             await AntiDelDB.create({ 
                 id: 1, 
-                status: config.ANTI_DELETE === "true" || true 
+                status: config.ANTI_DELETE === "true" 
             });
             isInitialized = true;
         }
@@ -78,10 +78,10 @@ async function getAnti() {
     try {
         await initializeAntiDeleteSettings();
         const record = await AntiDelDB.findByPk(1);
-        return record ? record.status : (config.ANTI_DELETE === "true" || true);
+        return record ? record.status : (config.ANTI_DELETE === "true");
     } catch (error) {
         console.error('Error getting anti-delete status:', error);
-        return config.ANTI_DELETE === "true" || true;
+        return config.ANTI_DELETE === "true";
     }
 }
 

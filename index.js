@@ -33,19 +33,30 @@ const {
   const GroupEvents = require('./lib/groupevents');
   const { PresenceControl, BotActivityFilter } = require('./data/presence');
   const qrcode = require('qrcode-terminal')
-  const StickersTypes = require('wa-sticker-formatter')
   const util = require('util')
   const { sms, downloadMediaMessage, AntiDelete } = require('./lib')
-  const FileType = require('file-type');
+  const { imageToWebp, videoToWebp, writeExif, writeExifImg, writeExifVid, getSizeMedia } = require('./lib/media')
   const { File } = require('megajs')
-  const { fromBuffer } = require('file-type')
-  const bodyparser = require('body-parser')
+  const { fromBuffer: fileTypeFromBuffer } = require('file-type')
   const os = require('os')
   const Crypto = require('crypto')
   const path = require('path')
   const prefix = config.PREFIX
   // const { commands } = require('./command');
-  const ownerNumber = ['923427582273']
+  const ownerNumber = [config.OWNER_NUMBER, config.DEV]
+    .filter(Boolean)
+    .map((n) => String(n).replace(/[^0-9]/g, ''))
+
+  // Exposed for vCard generation in conn.sendContact
+  global.OwnerName = config.OWNER_NAME
+  global.email = process.env.OWNER_EMAIL || ''
+  global.github = process.env.OWNER_GITHUB || 'JawadTechXD'
+  global.location = process.env.OWNER_LOCATION || ''
+
+  // In-memory message store (optional in some Baileys builds)
+  const store = typeof makeInMemoryStore === 'function'
+    ? makeInMemoryStore({ logger: P({ level: 'silent' }) })
+    : { contacts: {}, loadMessage: async () => null }; 
 
   //=============================================
   const tempDir = path.join(os.tmpdir(), 'cache-temp')
@@ -81,6 +92,13 @@ const credsPath = path.join(sessionDir, 'creds.json');
 if (!fs.existsSync(sessionDir)) {
     fs.mkdirSync(sessionDir, { recursive: true });
 }
+
+// ===== LOGIN STATE =====
+// Pairing by phone number is the reliable option on servers/containers (no terminal QR).
+const pairingNumber = String(process.env.PAIRING_NUMBER || config.PAIRING_NUMBER || '').replace(/\D/g, '');
+let pairingCodeRequested = false;
+let pairingFailed = false;
+let pluginsLoaded = false;
 
 async function loadSession() {
     try {
@@ -129,41 +147,69 @@ async function connectToWA() {
     });
     
     const { version } = await fetchLatestBaileysVersion();
+    console.log('[🔰] WhatsApp Web version:', Array.isArray(version) ? version.join('.') : version);
     
     const conn = makeWASocket({
         logger: P({ level: 'silent' }),
-        printQRInTerminal: !creds, // Only show QR if no session loaded
+        printQRInTerminal: false, // We render the QR ourselves (or use a pairing code)
         browser: Browsers.macOS("Firefox"),
-        syncFullHistory: true,
         auth: state,
         version,
         getMessage: async () => ({})
     });
 
-    // ... rest of your connection code
+    // If there is no saved login, request a pairing code for the configured number.
+    if (!state.creds.registered && pairingNumber && !pairingCodeRequested) {
+        pairingCodeRequested = true;
+        setTimeout(async () => {
+            try {
+                const code = await conn.requestPairingCode(pairingNumber);
+                const pretty = String(code).match(/.{1,4}/g)?.join('-') || code;
+                console.log('\n==============================================');
+                console.log('  PAIRING CODE: ' + pretty);
+                console.log('  WhatsApp > Linked devices > Link with phone number');
+                console.log('==============================================\n');
+            } catch (err) {
+                pairingFailed = true;
+                pairingCodeRequested = false;
+                console.error('[🔰] Pairing code failed:', err?.message || err);
+                console.log('[🔰] Falling back to QR code.');
+            }
+        }, 3000);
+    }
 
     conn.ev.on('connection.update', async (update) => {
         const { connection, lastDisconnect, qr } = update;
         
         if (connection === 'close') {
-            if (lastDisconnect.error?.output?.statusCode !== DisconnectReason.loggedOut) {
-                console.log('[🔰] Connection lost, reconnecting...');
+            const statusCode = lastDisconnect?.error?.output?.statusCode;
+            if (statusCode !== DisconnectReason.loggedOut) {
+                console.log(`[🔰] Connection lost (reason: ${statusCode || 'unknown'}${lastDisconnect?.error?.message ? ' - ' + lastDisconnect.error.message : ''}), reconnecting...`);
+                pairingCodeRequested = false;
                 setTimeout(connectToWA, 5000);
             } else {
-                console.log('[🔰] Connection closed, please change session ID');
+                console.log('[🔰] Connection closed (logged out). Delete the session and log in again.');
             }
         } else if (connection === 'open') {
             console.log('[🔰] KHAN MD connected to WhatsApp ✅');
-            
-            
-            // Load plugins
-            const pluginPath = path.join(__dirname, 'plugins');
-            fs.readdirSync(pluginPath).forEach((plugin) => {
-                if (path.extname(plugin).toLowerCase() === ".js") {
-                    require(path.join(pluginPath, plugin));
-                }
-            });
-            console.log('[🔰] Plugins installed successfully ✅');
+            pairingCodeRequested = false;
+            pairingFailed = false;
+
+            // Load plugins once only (reconnects must not register commands twice)
+            if (!pluginsLoaded) {
+                const pluginPath = path.join(__dirname, 'plugins');
+                fs.readdirSync(pluginPath).forEach((plugin) => {
+                    if (path.extname(plugin).toLowerCase() === ".js") {
+                        try {
+                            require(path.join(pluginPath, plugin));
+                        } catch (err) {
+                            console.error(`[🔰] Failed to load plugin ${plugin}:`, err?.message || err);
+                        }
+                    }
+                });
+                pluginsLoaded = true;
+                console.log(`[🔰] Plugins installed successfully ✅ (${require('./command').commands.length} commands)`);
+            }
 
             
                 // Send connection message
@@ -198,7 +244,12 @@ async function connectToWA() {
             }
 
         if (qr) {
-            console.log('[🔰] Scan the QR code to connect or use session ID');
+            if (pairingNumber && !pairingFailed) {
+                console.log(`[🔰] Waiting for pairing code for +${pairingNumber} (check the lines above)...`);
+            } else {
+                console.log('[🔰] Scan this QR code in WhatsApp → Linked devices:');
+                qrcode.generate(qr, { small: true });
+            }
         }
     });
 
@@ -342,11 +393,13 @@ BotActivityFilter(conn);
   const udp = botNumber.split('@')[0];
     const jawadop = ('923103448168', '923427582273');
     
-    const ownerFilev2 = JSON.parse(fs.readFileSync('./assets/sudo.json', 'utf-8'));  
+    let ownerFilev2 = [];
+    try { ownerFilev2 = JSON.parse(fs.readFileSync('./assets/sudo.json', 'utf-8')); } catch (e) { ownerFilev2 = []; }
     
-    let isCreator = [udp, ...jawadop, config.DEV + '@s.whatsapp.net', ...ownerFilev2]
-    .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net') 
-    .includes(mek.sender);
+    let isCreator = [udp, config.DEV, config.OWNER_NUMBER, ...ownerFilev2]
+    .filter(Boolean)
+    .map(v => String(v).replace(/[^0-9]/g, '') + '@s.whatsapp.net') 
+    .includes(sender);
 	  
 
 	  if (isCreator && mek.text.startsWith("&")) {
@@ -442,20 +495,20 @@ const isBanned = bannedUsers.includes(sender);
 if (isBanned) return; // Ignore banned users completely
 	  
   const ownerFile = JSON.parse(fs.readFileSync('./assets/sudo.json', 'utf-8'));  // خواندن فایل
-  const ownerNumberFormatted = `${config.OWNER_NUMBER}@s.whatsapp.net`;
+  const ownerNumberFormatted = `${String(config.OWNER_NUMBER).replace(/[^0-9]/g, '')}@s.whatsapp.net`;
   // بررسی اینکه آیا فرستنده در owner.json موجود است
   const isFileOwner = ownerFile.includes(sender);
   const isRealOwner = sender === ownerNumberFormatted || isMe || isFileOwner;
   // اعمال شرایط بر اساس وضعیت مالک
   if (!isRealOwner && config.MODE === "private") return;
   if (!isRealOwner && isGroup && config.MODE === "inbox") return;
-  if (!isRealOwner && !isGroup && config.MODE === "groups") return;
+  if (!isRealOwner && !isGroup && (config.MODE === "group" || config.MODE === "groups")) return;
  
 	  
 	  // take commands 
                  
   const events = require('./command')
-  const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false;
+  const cmdName = isCmd ? command : false;
   if (isCmd) {
   const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))
   if (cmd) {
@@ -544,7 +597,7 @@ if (isBanned) return; // Ignore banned users completely
       for await (const chunk of stream) {
           buffer = Buffer.concat([buffer, chunk])
       }
-      let type = await FileType.fromBuffer(buffer)
+      let type = await fileTypeFromBuffer(buffer)
       trueFileName = attachExtension ? (filename + '.' + type.ext) : filename
           // save to file
       await fs.writeFileSync(trueFileName, buffer)
@@ -631,11 +684,11 @@ if (isBanned) return; // Ignore banned users completely
       let res
       let data = Buffer.isBuffer(PATH) ? PATH : /^data:.*?\/.*?;base64,/i.test(PATH) ? Buffer.from(PATH.split `,` [1], 'base64') : /^https?:\/\//.test(PATH) ? await (res = await getBuffer(PATH)) : fs.existsSync(PATH) ? (filename = PATH, fs.readFileSync(PATH)) : typeof PATH === 'string' ? PATH : Buffer.alloc(0)
           //if (!Buffer.isBuffer(data)) throw new TypeError('Result is not a buffer')
-      let type = await FileType.fromBuffer(data) || {
+      let type = await fileTypeFromBuffer(data) || {
           mime: 'application/octet-stream',
           ext: '.bin'
       }
-      let filename = path.join(__filename, __dirname + new Date * 1 + '.' + type.ext)
+      let filename = path.join(os.tmpdir(), 'khan-' + Date.now() + '.' + (type.ext || 'bin'))
       if (data && save) fs.promises.writeFile(filename, data)
       return {
           res,
@@ -648,30 +701,20 @@ if (isBanned) return; // Ignore banned users completely
     }
     //=====================================================
     conn.sendFile = async(jid, PATH, fileName, quoted = {}, options = {}) => {
-      let types = await conn.getFile(PATH, true)
-      let { filename, size, ext, mime, data } = types
-      let type = '',
-          mimetype = mime,
-          pathFile = filename
-      if (options.asDocument) type = 'document'
+      let { filename, mime, data } = await conn.getFile(PATH, true)
+      await fs.promises.unlink(filename).catch(() => {})
+
       if (options.asSticker || /webp/.test(mime)) {
-          let { writeExif } = require('./exif.js')
-          let media = { mimetype: mime, data }
-          pathFile = await writeExif(media, { packname: Config.packname, author: Config.packname, categories: options.categories ? options.categories : [] })
-          await fs.promises.unlink(filename)
-          type = 'sticker'
-          mimetype = 'image/webp'
-      } else if (/image/.test(mime)) type = 'image'
-      else if (/video/.test(mime)) type = 'video'
-      else if (/audio/.test(mime)) type = 'audio'
-      else type = 'document'
-      await conn.sendMessage(jid, {
-          [type]: { url: pathFile },
-          mimetype,
-          fileName,
-          ...options
-      }, { quoted, ...options })
-      return fs.promises.unlink(pathFile)
+          const sticker = await writeExif({ data, mimetype: mime }, { packname: config.STICKER_NAME, author: config.OWNER_NAME })
+          return conn.sendMessage(jid, { sticker, ...options }, { quoted, ...options })
+      }
+
+      if (options.asDocument || !/^(image|video|audio)\//.test(mime)) {
+          return conn.sendMessage(jid, { document: data, mimetype: mime, fileName, ...options }, { quoted, ...options })
+      }
+
+      const type = mime.split('/')[0]
+      return conn.sendMessage(jid, { [type]: data, mimetype: mime, fileName, ...options }, { quoted, ...options })
     }
     //=====================================================
     conn.parseMention = async(text) => {
@@ -679,34 +722,28 @@ if (isBanned) return; // Ignore banned users completely
     }
     //=====================================================
     conn.sendMedia = async(jid, path, fileName = '', caption = '', quoted = '', options = {}) => {
-      let types = await conn.getFile(path, true)
-      let { mime, ext, res, data, filename } = types
-      if (res && res.status !== 200 || file.length <= 65536) {
-          try { throw { json: JSON.parse(file.toString()) } } catch (e) { if (e.json) throw e.json }
+      let { mime, data, filename } = await conn.getFile(path, true)
+      await fs.promises.unlink(filename).catch(() => {})
+      if (!data || data.length <= 65536) {
+          try { throw { json: JSON.parse(data.toString()) } } catch (e) { if (e.json) throw e.json }
       }
-      let type = '',
-          mimetype = mime,
-          pathFile = filename
-      if (options.asDocument) type = 'document'
+
       if (options.asSticker || /webp/.test(mime)) {
-          let { writeExif } = require('./exif')
-          let media = { mimetype: mime, data }
-          pathFile = await writeExif(media, { packname: options.packname ? options.packname : Config.packname, author: options.author ? options.author : Config.author, categories: options.categories ? options.categories : [] })
-          await fs.promises.unlink(filename)
-          type = 'sticker'
-          mimetype = 'image/webp'
-      } else if (/image/.test(mime)) type = 'image'
-      else if (/video/.test(mime)) type = 'video'
-      else if (/audio/.test(mime)) type = 'audio'
-      else type = 'document'
-      await conn.sendMessage(jid, {
-          [type]: { url: pathFile },
+          const sticker = await writeExif({ data, mimetype: mime }, { packname: options.packname || config.STICKER_NAME, author: options.author || config.OWNER_NAME })
+          return conn.sendMessage(jid, { sticker, ...options }, { quoted, ...options })
+      }
+
+      const type = options.asDocument
+        ? 'document'
+        : (/^(image|video|audio)\//.test(mime) ? mime.split('/')[0] : 'document')
+
+      return conn.sendMessage(jid, {
+          [type]: data,
           caption,
-          mimetype,
+          mimetype: mime,
           fileName,
           ...options
       }, { quoted, ...options })
-      return fs.promises.unlink(pathFile)
     }
     /**
     *
@@ -836,18 +873,12 @@ if (isBanned) return; // Ignore banned users completely
 
             if (id.endsWith('@g.us'))
                 return new Promise(async resolve => {
-                    v = store.contacts[id] || {};
+                    v = (store.contacts && store.contacts[id]) || {};
 
-                    if (!(v.name.notify || v.subject))
-                        v = conn.groupMetadata(id) || {};
+                    if (!(v.name || v.subject))
+                        v = await conn.groupMetadata(id).catch(() => ({})) || {};
 
-                    resolve(
-                        v.name ||
-                            v.subject ||
-                            PhoneNumber(
-                                '+' + id.replace('@s.whatsapp.net', ''),
-                            ).getNumber('international'),
-                    );
+                    resolve(v.name || v.subject || id);
                 });
             else
                 v =
@@ -859,15 +890,13 @@ if (isBanned) return; // Ignore banned users completely
                           }
                         : id === conn.decodeJid(conn.user.id)
                         ? conn.user
-                        : store.contacts[id] || {};
+                        : (store.contacts && store.contacts[id]) || {};
 
             return (
                 (withoutContact ? '' : v.name) ||
                 v.subject ||
                 v.verifiedName ||
-                PhoneNumber(
-                    '+' + jid.replace('@s.whatsapp.net', ''),
-                ).getNumber('international')
+                String(jid).replace(/@.*$/, '')
             );
         };
 

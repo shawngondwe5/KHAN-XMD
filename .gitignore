@@ -1,0 +1,20 @@
+# WhatsApp login credentials - never commit these
+sessions/
+creds.json
+config.env
+.env
+
+# Runtime data
+store/
+temp/
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

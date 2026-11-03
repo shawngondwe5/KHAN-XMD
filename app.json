@@ -5,13 +5,18 @@
   "keywords": ["KHAN-MD"],
   "success_url": "/",
 
-    "stack": "container",
   "env": {
     "SESSION_ID": {
-      "description": "Put the session-id here.",
-      "required": true,
+      "description": "Optional. MEGA.nz file id containing a saved creds.json (IK~ prefix allowed). Leave empty to log in with PAIRING_NUMBER or QR.",
+      "required": false,
       "value": ""
-    },  
+    },
+
+    "PAIRING_NUMBER": {
+      "description": "Phone number in international format for pairing-code login, e.g. 265991234567. Leave empty to use QR.",
+      "required": false,
+      "value": ""
+    },
     
     "STICKER_NAME": {
       "description": "type your sticker pack name.",
