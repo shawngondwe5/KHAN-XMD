@@ -8,9 +8,9 @@
     "npm": ">=10.x"
   },
   "scripts": {
-    "start": "pm2 start index.js --deep-monitoring --attach --name KHAN-MD",
-    "stop": "pm2 stop KHAN-MD",
-    "restart": "pm2 restart KHAN-MD"
+    "dev": "node index.js",
+    "build": "echo 'Build complete'",
+    "start": "node index.js"
   },
   "dependencies": {
     "@whiskeysockets/baileys": "github:EdderBot02/bail",
