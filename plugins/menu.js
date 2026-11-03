@@ -149,6 +149,6 @@ cmd({
 }, async (conn, mek, m, { from }) => {
     const started = Date.now();
     await conn.sendMessage(from, {
-        text: `◈ *SYSTEM32 WB*  ·  PONG\\nResponse time: ${Date.now() - started} ms`
+        text: `◈ *SYSTEM32 WB*  ·  PONG\nResponse time: ${Date.now() - started} ms`
     }, { quoted: mek });
 });
