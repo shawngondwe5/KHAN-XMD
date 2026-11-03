@@ -3,8 +3,8 @@ const { cmd, commands } = require('../command');
 
 // These features remain installed and usable; they are simply omitted from
 // the public command directory to keep .menu focused on the core bot.
-const HIDDEN_CATEGORIES = /^(?:audio|quran|islam|religion|religious|channel|channels|region|regions|staff|regional_staff)$/i;
-const HIDDEN_COMMAND = /(?:^|[._-])(forward(?:ed)?|audio|voice|quran|islam|religion|channel|channels|region|regions|staff)(?:$|[._-])/i;
+const HIDDEN_CATEGORIES = /^(?:audio|quran|islam|religion|religious|channel|channels|region|regions|staff|regionalstaff)$/i;
+const HIDDEN_COMMAND = /forward(?:ed)?|audio|voice|quran|islam|relig|channel|region|staff/i;
 
 const CATEGORY_LABELS = {
     ai: '✳️ AI & INTELLIGENCE',
@@ -21,7 +21,7 @@ function shouldShowCommand(command) {
     if (!command || !command.pattern || command.dontAddCommandList) return false;
 
     const category = String(command.category || 'misc').trim();
-    if (HIDDEN_CATEGORIES.test(category)) return false;
+    if (HIDDEN_CATEGORIES.test(category.replace(/[\\s_-]/g, ''))) return false;
 
     const source = [
         command.pattern,
