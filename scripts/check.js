@@ -34,14 +34,14 @@ for (const file of files) {
     });
 
     if (result.status === 0) {
-        process.stdout.write(`✓ ${path.relative(root, file)}\\n`);
+        process.stdout.write(`✓ ${path.relative(root, file)}\n`);
     } else {
         failed += 1;
-        process.stderr.write(`✗ ${path.relative(root, file)}\\n`);
+        process.stderr.write(`✗ ${path.relative(root, file)}\n`);
         if (result.stderr) process.stderr.write(result.stderr);
-        if (result.error) process.stderr.write(`${result.error.message}\\n`);
+        if (result.error) process.stderr.write(`${result.error.message}\n`);
     }
 }
 
-process.stdout.write(`\\nChecked ${files.length} JavaScript file(s); ${failed} failed.\\n`);
+process.stdout.write(`\nChecked ${files.length} JavaScript file(s); ${failed} failed.\n`);
 process.exitCode = failed === 0 ? 0 : 1;
