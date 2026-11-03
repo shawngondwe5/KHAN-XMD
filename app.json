@@ -1,8 +1,8 @@
 {
-  "name": "KHAN-MD",
-  "description": "Javascript WhatsApp bot made by Jᴀᴡᴀᴅ TᴇᴄʜX",
-  "logo": "https://files.catbox.moe/neni8p.jpg",
-  "keywords": ["KHAN-MD"],
+  "name": "System32 WB",
+  "description": "System32 WB WhatsApp bot powered by Baileys",
+  "logo": "/logo.jpg",
+  "keywords": ["System32-WB", "system32", "whatsapp-bot"],
   "success_url": "/",
 
   "env": {
@@ -21,7 +21,7 @@
     "STICKER_NAME": {
       "description": "type your sticker pack name.",
       "required": false,
-      "value": "KHAN-MD"
+      "value": "System32 WB"
     }, 
       
     "PREFIX": {
@@ -83,15 +83,14 @@
     "AUTO_STATUS_MSG": {
       "description": "Type custom message on status reply",
       "required": true,
-      "value": "*SEEN YOUR STATUS BY KHAN-MD 🖤*"
-   
+      "value": "*System32 WB Online*"
      }, 
     
     "OWNER_NAME": {
       "description": "Type Bot Owner Name.",
       "required": false,
-      "value": "Jᴀᴡᴀᴅ TᴇᴄʜX"
-}, 
+      "value": "Shawn Gondwe"
+    }, 
 
     "OWNER_NUMBER": {
       "description": "put the owner number for bot.",
@@ -103,8 +102,7 @@
     "BOT_NAME": {
       "description": "Type here the bot name.",
       "required": false,
-      "value": "KHAN-MD"
-
+      "value": "System32 WB"
       }, 
 
     "ANTI_LINK": {
@@ -129,13 +127,13 @@
     "MENU_IMAGE_URL": {
       "description": "add url for mention reply and menu if want.",
       "required": false,
-      "value": "https://files.catbox.moe/7zfdcq.jpg"
+      "value": "/menu.jpg"
     },
     
      "DESCRIPTION": {
       "description": "add caption for menu and other",
       "required": false,
-      "value": "*© ᴘᴏᴡᴇʀᴇᴅ ʙʏ Jᴀᴡᴀᴅ TᴇᴄʜX*"
+      "value": "*System32 WB Core Kernel*"
     },
 
       "DELETE_LINKS": {

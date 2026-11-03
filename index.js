@@ -59,9 +59,24 @@ const {
     : { contacts: {}, loadMessage: async () => null }; 
 
   //=============================================
-  const tempDir = path.join(os.tmpdir(), 'cache-temp')
+  // Ensure image symlinks exist at filesystem root and app root
+  ['menu.jpg', 'logo.jpg', 'banner.jpg'].forEach(file => {
+      const assetPath = path.join(__dirname, 'assets', file);
+      if (fs.existsSync(assetPath)) {
+          try {
+              const rootPath = path.join('/', file);
+              if (!fs.existsSync(rootPath)) fs.symlinkSync(assetPath, rootPath);
+          } catch (_) {}
+          try {
+              const localPath = path.join(__dirname, file);
+              if (!fs.existsSync(localPath)) fs.symlinkSync(assetPath, localPath);
+          } catch (_) {}
+      }
+  });
+  
+  const tempDir = path.join(os.tmpdir(), 'cache-temp');
   if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir)
+      fs.mkdirSync(tempDir, { recursive: true });
   }
   
   const clearTempDir = () => {
@@ -99,6 +114,9 @@ const pairingNumber = String(process.env.PAIRING_NUMBER || config.PAIRING_NUMBER
 let pairingCodeRequested = false;
 let pairingFailed = false;
 let pluginsLoaded = false;
+let latestQR = null;
+let latestPairingCode = null;
+let botConnectionStatus = 'starting';
 
 async function loadSession() {
     try {
@@ -137,7 +155,7 @@ async function loadSession() {
 //=======SESSION-AUTH==============
 
 async function connectToWA() {
-    console.log("[🔰] KHAN-MD Connecting to WhatsApp ⏳️...");
+    console.log("[SYSTEM] System32 WB Connecting to WhatsApp...");
     
     // Load session if available
     const creds = await loadSession();
@@ -165,6 +183,8 @@ async function connectToWA() {
             try {
                 const code = await conn.requestPairingCode(pairingNumber);
                 const pretty = String(code).match(/.{1,4}/g)?.join('-') || code;
+                latestPairingCode = pretty;
+                botConnectionStatus = 'pairing_ready';
                 console.log('\n==============================================');
                 console.log('  PAIRING CODE: ' + pretty);
                 console.log('  WhatsApp > Linked devices > Link with phone number');
@@ -182,6 +202,7 @@ async function connectToWA() {
         const { connection, lastDisconnect, qr } = update;
         
         if (connection === 'close') {
+            botConnectionStatus = 'disconnected';
             const statusCode = lastDisconnect?.error?.output?.statusCode;
             if (statusCode !== DisconnectReason.loggedOut) {
                 console.log(`[🔰] Connection lost (reason: ${statusCode || 'unknown'}${lastDisconnect?.error?.message ? ' - ' + lastDisconnect.error.message : ''}), reconnecting...`);
@@ -191,7 +212,10 @@ async function connectToWA() {
                 console.log('[🔰] Connection closed (logged out). Delete the session and log in again.');
             }
         } else if (connection === 'open') {
-            console.log('[🔰] KHAN MD connected to WhatsApp ✅');
+            console.log('[SYSTEM] System32 WB connected to WhatsApp [OK]');
+            botConnectionStatus = 'connected';
+            latestQR = null;
+            latestPairingCode = null;
             pairingCodeRequested = false;
             pairingFailed = false;
 
@@ -215,35 +239,33 @@ async function connectToWA() {
                 // Send connection message
      	
                 try {
-                    const username = config.REPO.split('/').slice(3, 4)[0];
-                    const mrfrank = `https://github.com/${username}`;
+                    const upMessage = `╭─〔 SYSTEM32 WB 〕  
+├─▸ Kernel: Active & Initialized
+╰─➤ Ready for command execution.
+
+╭──〔 System Parameters 〕  
+├─ Prefix: ${prefix}
+├─ Operator: ${config.OWNER_NAME}
+├─ Mode: ${config.MODE}
+╰─ Core: System32 WB`;
                     
-                    const upMessage = `╭─〔 *🤖 KHAN-MD BOT* 〕  
-├─▸ *Ultra Super Fast Powerfull ⚠️*  
-│     *World Best BOT KHAN-MD* 
-╰─➤ *Your Smart WhatsApp Bot is Ready To use 🍁!*  
-
-- *🖤 Thank You for Choosing KHAN-MD!* 
-
-╭──〔 🔗 *Information* 〕  
-├─ 🧩 *Prefix:* = ${prefix}
-├─ 📢 *Join Channel:*  
-│    https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j  
-├─ 🌟 *Star the Repo:*  
-│    https://github.com/JawadYT36/KHAN-MD  
-╰─🚀 *Powered by JawadTechX*`;
+                    const bannerPath = path.join(__dirname, 'assets', 'banner.jpg');
+                    const menuImage = fs.existsSync(bannerPath) ? fs.readFileSync(bannerPath) : { url: config.MENU_IMAGE_URL };
                     
                     await conn.sendMessage(conn.user.id, { 
-                        image: { url: `https://files.catbox.moe/7zfdcq.jpg` }, 
+                        image: menuImage, 
                         caption: upMessage 
                     });
-                    
                 } catch (sendError) {
                     console.error('[🔰] Error sending messages:', sendError);
                 }
             }
 
         if (qr) {
+            latestQR = qr;
+            if (!latestPairingCode) {
+                botConnectionStatus = 'qr_ready';
+            }
             if (pairingNumber && !pairingFailed) {
                 console.log(`[🔰] Waiting for pairing code for +${pairingNumber} (check the lines above)...`);
             } else {
@@ -962,11 +984,15 @@ if (isBanned) return; // Ignore banned users completely
 
   app.get('/api/status', (req, res) => {
     res.json({
-      status: 'online',
-      bot_name: config.BOT_NAME || 'KHAN-MD',
+      status: botConnectionStatus,
+      bot_name: config.BOT_NAME || 'System32 WB',
       prefix: config.PREFIX || '.',
       mode: config.MODE || 'public',
-      version: '5.0.0'
+      version: '5.0.0',
+      pairing_number: pairingNumber ? `+${pairingNumber}` : null,
+      pairing_code: latestPairingCode,
+      qr_image: latestQR ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(latestQR)}` : null,
+      has_session: Boolean(config.SESSION_ID && config.SESSION_ID.trim())
     });
   });
 

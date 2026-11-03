@@ -44,7 +44,7 @@ cmd({
         await conn.sendMessage(from, {
             video: { url: videoUrl },
             mimetype: 'video/mp4',
-            caption: `🎥 *Sora AI Video*\n\n📝 Prompt: ${input}\n\nPowered by *KHAN-MD*`
+            caption: `🎥 *Sora AI Video*\n\n📝 Prompt: ${input}\n\nPowered by *VORTEX-MD*`
         }, { quoted: mek });
 
     } catch (err) {

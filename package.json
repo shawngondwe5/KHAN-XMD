@@ -1,7 +1,7 @@
 {
-  "name": "khan-md",
+  "name": "system32-wb",
   "version": "5.0.0",
-  "description": "WhatsApp bot powered by Baileys",
+  "description": "System32 WB WhatsApp bot powered by Baileys",
   "main": "index.js",
   "engines": {
     "node": ">=20.0.0",

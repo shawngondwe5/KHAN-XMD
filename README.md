@@ -21,7 +21,7 @@
 | **Repo Size** | <img src="https://img.shields.io/github/repo-size/JawadTechXD/KHAN-XMD?color=9D00FF&label=Repo+Size&style=flat-square"> |
 | **Stars** | <img src="https://img.shields.io/github/stars/JawadTechXD/KHAN-XMD?color=9D00FF&label=Stars&style=flat-square"> |
 | **Forks** | <img src="https://img.shields.io/github/forks/JawadTechXD/KHAN-XMD?color=9D00FF&label=Forks&style=flat-square"> |
-| **Visitors** | <img src="https://visitor-badge.laobi.icu/badge?page_id=JawadTechXD.KHAN-MD&style=flat-square&color=9D00FF"> | 
+| **Visitors** | <img src="https://visitor-badge.laobi.icu/badge?page_id=JawadTechXD.VORTEX-MD&style=flat-square&color=9D00FF"> | 
 | **Maintained** | <img src="https://img.shields.io/badge/Maintained-Yes-00C853?style=flat-square"> |
 | **Version** | <img src="https://img.shields.io/badge/Version-1.0.0-0D47A1?style=flat-square"> |
 

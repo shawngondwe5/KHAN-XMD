@@ -3,255 +3,600 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>KHAN-MD CONNECTED 🌞</title>
-  <!-- Google Fonts for summer style -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&family=Fredoka+One&display=swap" rel="stylesheet">
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://yourdomain.com/path/to/favicon.png">
+  <title>System32 WB | WhatsApp Kernel Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* Body Styling with summer sunset background */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --bg: #070b12;
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(56, 189, 248, 0.2);
+      --accent: #00f0ff;
+      --accent-muted: rgba(0, 240, 255, 0.12);
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
     body {
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 90% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 45%);
+      color: var(--text);
+      min-height: 100vh;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
-      height: 100vh;
-      background: linear-gradient(to bottom, #ff5e62, #ff9966);
+      padding: 32px 16px;
+      line-height: 1.5;
+    }
+
+    .main-wrap {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* System Header Banner */
+    .brand-hero {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      background: #0b1120;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .banner-container {
+      width: 100%;
+      height: 220px;
       overflow: hidden;
       position: relative;
-      color: #fff;
     }
 
-    /* Palm tree decoration */
-    .palm-tree {
-      position: absolute;
-      bottom: 0;
-      right: 10%;
-      font-size: 100px;
-      z-index: 1;
-      opacity: 0.3;
+    .banner-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      filter: brightness(0.85);
     }
 
-    /* Sun decoration */
-    .sun {
+    .banner-gradient {
       position: absolute;
-      top: 15%;
-      right: 15%;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(7, 11, 18, 0.1) 0%, rgba(7, 11, 18, 0.95) 100%);
+    }
+
+    .brand-header {
+      padding: 0 24px 20px 24px;
+      margin-top: -55px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .avatar-box {
       width: 100px;
       height: 100px;
-      background: #ffde59;
-      border-radius: 50%;
-      box-shadow: 0 0 50px #ffde59;
-      z-index: 1;
+      border-radius: 18px;
+      padding: 3px;
+      background: linear-gradient(135deg, var(--accent), #2563eb);
+      box-shadow: 0 8px 24px var(--accent-glow);
+      flex-shrink: 0;
     }
 
-    /* Header Styling with slideDown animation */
-    header {
-      position: absolute;
-      top: -100px;
-      left: 0;
+    .avatar-box img {
       width: 100%;
-      text-align: center;
-      padding: 20px 0;
-      background: rgba(255, 87, 34, 0.8);
-      box-shadow: 0 4px 15px rgba(255, 87, 34, 0.5);
-      z-index: 3;
-      animation: slideDown 1.5s ease-out forwards;
-    }
-    @keyframes slideDown {
-      from { top: -100px; }
-      to { top: 0; }
-    }
-    header h1 {
-      font-family: 'Fredoka One', cursive;
-      font-size: 36px;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      margin: 0;
-    }
-
-    /* Main Container with fade-in and scale transitions */
-    .container {
-      text-align: center;
-      padding: 30px;
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(5px);
+      height: 100%;
       border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(255, 87, 34, 0.3);
-      width: 80%;
-      max-width: 600px;
-      z-index: 2;
-      animation: fadeIn 2s ease-in-out;
-      transition: transform 0.3s ease-in-out;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .container:hover {
-      transform: scale(1.02);
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
+      object-fit: cover;
+      display: block;
+      background: #000;
     }
 
-    /* Title Styling with pulse animation */
-    .title {
-      font-family: 'Fredoka One', cursive;
-      font-size: 48px;
-      font-weight: bold;
-      text-transform: uppercase;
+    .brand-info {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .brand-title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
       color: #fff;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
     }
 
-    /* Marquee Animation for running text */
-    .marquee {
-      margin-top: 20px;
-      overflow: hidden;
-      white-space: nowrap;
-      box-sizing: border-box;
-    }
-    .marquee span {
-      display: inline-block;
-      font-size: 22px;
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-      animation: marqueeAnimation 12s linear infinite;
-    }
-    @keyframes marqueeAnimation {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
+    .system-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--accent-muted);
+      color: var(--accent);
+      border: 1px solid rgba(0, 240, 255, 0.3);
+      padding: 3px 10px;
+      border-radius: 6px;
     }
 
-    /* Button Styling with hover effects */
-    .action-btn {
-      display: inline-block;
-      margin-top: 20px;
-      padding: 12px 30px;
-      font-size: 18px;
-      color: #fff;
-      text-transform: uppercase;
-      text-decoration: none;
-      border: 2px solid #fff;
-      border-radius: 50px;
-      transition: all 0.3s;
-      background: rgba(255, 87, 34, 0.7);
-      position: relative;
-      z-index: 2;
-      font-weight: bold;
-      overflow: hidden;
-    }
-    .action-btn:hover {
-      background: #fff;
-      color: #ff5e62;
-      cursor: pointer;
-      box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-      transform: translateY(-3px);
-    }
-    .action-btn:active {
-      transform: translateY(0);
+    .brand-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
     }
 
-    /* Footer Styling with subtle animations */
-    footer {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      text-align: center;
-      padding: 15px 0;
-      background: rgba(255, 87, 34, 0.8);
-      font-family: 'Poppins', sans-serif;
+    /* Live Telemetry Card */
+    .status-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(14px);
+      border-radius: 16px;
+      padding: 22px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .status-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
       font-size: 14px;
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-      animation: fadeInFooter 3s ease-in-out;
-    }
-    @keyframes fadeInFooter {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    footer a {
-      color: #fff;
-      text-decoration: none;
-      transition: 0.3s;
-      font-weight: bold;
-    }
-    footer a:hover {
-      color: #ffde59;
-      text-shadow: 0 0 5px rgba(255, 222, 89, 0.5);
     }
 
-    /* Beach wave decoration */
-    .wave {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 100px;
-      background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 1200 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none"><path d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z" opacity=".25" fill="%23ffffff"/><path d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z" opacity=".5" fill="%23ffffff"/><path d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z" fill="%23ffffff"/></svg>');
-      background-size: cover;
-      animation: waveAnimation 10s linear infinite;
-      z-index: 1;
+    .icon-svg {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      flex-shrink: 0;
     }
-    @keyframes waveAnimation {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #64748b;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    .status-dot.connected { background: var(--emerald); color: var(--emerald); }
+    .status-dot.pairing { background: var(--accent); color: var(--accent); animation: pulse 1.5s infinite; }
+    .status-dot.qr { background: var(--amber); color: var(--amber); animation: pulse 1.5s infinite; }
+    .status-dot.starting { background: #64748b; color: #64748b; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.15); }
+    }
+
+    .meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .meta-tags strong {
+      color: var(--text);
+    }
+
+    /* Content states */
+    .connection-content {
+      background: rgba(11, 18, 33, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 22px;
+      text-align: center;
+    }
+
+    .code-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 34px;
+      font-weight: 700;
+      letter-spacing: 5px;
+      color: var(--accent);
+      background: rgba(0, 240, 255, 0.08);
+      border: 1px dashed rgba(0, 240, 255, 0.4);
+      border-radius: 10px;
+      padding: 14px;
+      margin: 16px 0;
+      user-select: all;
+    }
+
+    .qr-frame {
+      margin: 16px auto;
+      max-width: 250px;
+      padding: 10px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .qr-frame img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 4px;
+    }
+
+    .instructions-list {
+      text-align: left;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 16px auto 0 auto;
+      max-width: 440px;
+      line-height: 1.6;
+    }
+
+    .instructions-list li {
+      margin-bottom: 6px;
+    }
+
+    .instructions-list strong {
+      color: var(--text);
+    }
+
+    .connected-box {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .connected-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--emerald);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .connected-box p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .connected-box code {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--emerald);
+      background: rgba(16, 185, 129, 0.15);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Modules & Capabilities */
+    .modules-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+    }
+
+    .module-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s;
+    }
+
+    .module-card:hover {
+      border-color: rgba(0, 240, 255, 0.4);
+    }
+
+    .module-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .module-icon-wrap {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .module-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .module-card p {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .cmd-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 8px;
+      border-radius: 4px;
+      color: var(--accent);
+      align-self: flex-start;
+      margin-top: auto;
+    }
+
+    footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <!-- Summer decorations -->
-  <div class="sun"></div>
-  <div class="palm-tree">🌴</div>
-  <div class="wave"></div>
-
-  <!-- Header -->
-  <header>
-    <h1>KHAN-MD Status</h1>
-  </header>
-
-  <!-- Main Content -->
-  <div class="container">
-    <!-- Status Title -->
-    <div class="title">KHAN-MD Online</div>
-
-    <!-- Running Text -->
-    <div class="marquee">
-      <span>
-        KHAN-MD is online! ☀️ | Reliable, Fast, and Efficient | Always here to help! 🏖️ | Stay ahead with KHAN-MD! 🌊
-      </span>
+  <div class="main-wrap">
+    
+    <!-- Hero Banner with System32 WB branding -->
+    <div class="brand-hero">
+      <div class="banner-container">
+        <img src="/banner.jpg" alt="System32 WB Architecture Console">
+        <div class="banner-gradient"></div>
+      </div>
+      <div class="brand-header">
+        <div class="avatar-box">
+          <img src="/logo.jpg" alt="System32 WB Processor Badge">
+        </div>
+        <div class="brand-info">
+          <div class="brand-title-row">
+            <h1 class="brand-title" id="bot-name">System32 WB</h1>
+            <span class="system-chip">
+              <span class="icon-svg">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 15h3M1 9h3M1 15h3"/></svg>
+              </span>
+              CORE v5.0
+            </span>
+          </div>
+          <p class="brand-desc">WhatsApp Kernel Architecture & Autonomous Engine</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Action Button with Version -->
-    <a href="https://whatsapp.com/channel/0029VatOy2EAzNc2WcShQw1j" class="action-btn">
-      <h3 id="version"></h3>
-    </a>
+    <!-- Live Status Panel -->
+    <div class="status-panel">
+      <div class="status-top-bar">
+        <div class="status-indicator">
+          <span class="status-dot starting" id="status-dot"></span>
+          <span id="status-text">Initializing Kernel...</span>
+        </div>
+        <div class="meta-tags">
+          <span>Prefix: <strong id="bot-prefix">.</strong></span>
+          <span>&bull;</span>
+          <span>Mode: <strong id="bot-mode">public</strong></span>
+        </div>
+      </div>
+
+      <div id="connection-container">
+        <div class="connection-content">
+          <p style="font-size: 13px; color: var(--text-muted);">Syncing authentication state with WhatsApp servers...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modules Grid (Real SVG Icons, No Emojis) -->
+    <div>
+      <div class="modules-title">
+        <span class="icon-svg">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </span>
+        System Modules
+      </div>
+      <div class="features-grid">
+        
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </div>
+            <h4>AI Processing</h4>
+          </div>
+          <p>Natural language processing, intelligent chat queries, and automated translation.</p>
+          <span class="cmd-badge">.ai &bull; .translate</span>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+            <h4>Media Retrieval</h4>
+          </div>
+          <p>High-speed audio, video, document, and binary download pipeline.</p>
+          <span class="cmd-badge">.ytmp4 &bull; .apk</span>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+            </div>
+            <h4>Sticker Conversion</h4>
+          </div>
+          <p>Automated WebP graphic compilation with custom package EXIF metadata.</p>
+          <span class="cmd-badge">.sticker &bull; .take</span>
+        </div>
+
+        <div class="module-card">
+          <div class="module-header">
+            <div class="module-icon-wrap">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h4>Kernel Security</h4>
+          </div>
+          <p>Anti-link enforcement, view-once protection, and administrative controls.</p>
+          <span class="cmd-badge">.kick &bull; .promote</span>
+        </div>
+
+      </div>
+    </div>
+
+    <footer>
+      <span>System32 WB</span>
+      <span>&bull;</span>
+      <span>Operator: <a href="https://github.com/shawngondwe5/KHAN-XMD" target="_blank">Shawn Gondwe</a></span>
+      <span>&bull;</span>
+      <span>Runtime: Node.js / Baileys</span>
+    </footer>
+
   </div>
 
-  <!-- Footer -->
-  <footer>
-    <p>Developed with ❤️ by <a href="https://github.com/JawadTechXD" target="_blank">JawadTech</a> | © 2025 - ♾️ KHAN-MD.</p>
-  </footer>
-
   <script>
-    // Fetch the version number from the package.json of the KHAN-MD repo
-    fetch('https://raw.githubusercontent.com/JawadTechXD/KHAN-MD/master/package.json')
-      .then(response => response.json())
-      .then(data => {
-        const version = data.version;
-        document.getElementById('version').textContent = `Version: ${version}`;
-      })
-      .catch(error => {
-        console.error('Error fetching version:', error);
-        document.getElementById('version').textContent = 'Summer Edition';
-      });
+    async function pollStatus() {
+      try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+
+        document.getElementById('bot-name').textContent = data.bot_name || 'System32 WB';
+        document.getElementById('bot-prefix').textContent = data.prefix || '.';
+        document.getElementById('bot-mode').textContent = data.mode || 'public';
+
+        const dot = document.getElementById('status-dot');
+        const text = document.getElementById('status-text');
+        const container = document.getElementById('connection-container');
+
+        if (data.status === 'connected') {
+          dot.className = 'status-dot connected';
+          text.textContent = 'Kernel Connected';
+          container.innerHTML = `
+            <div class="connected-box">
+              <div class="connected-title">
+                <span class="icon-svg">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </span>
+                System32 WB Connected
+              </div>
+              <p>Kernel is actively listening on WhatsApp socket. Execute <code>${data.prefix || '.'}menu</code> or <code>${data.prefix || '.'}alive</code> in any chat.</p>
+            </div>
+          `;
+        } else if (data.status === 'pairing_ready' && data.pairing_code) {
+          dot.className = 'status-dot pairing';
+          text.textContent = 'Pairing Code Active';
+          container.innerHTML = `
+            <div class="connection-content">
+              <div style="font-size:12px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+                Pair with Phone Number
+              </div>
+              <div class="code-display">${data.pairing_code}</div>
+              <ol class="instructions-list">
+                <li>Open WhatsApp on device <strong>${data.pairing_number || ''}</strong></li>
+                <li>Navigate to <strong>Settings</strong> &rarr; <strong>Linked Devices</strong></li>
+                <li>Select <strong>Link with phone number instead</strong></li>
+                <li>Enter the 8-character verification code shown above</li>
+              </ol>
+            </div>
+          `;
+        } else if (data.qr_image) {
+          dot.className = 'status-dot qr';
+          text.textContent = 'Awaiting Device Scan';
+          container.innerHTML = `
+            <div class="connection-content">
+              <div style="font-size:12px; font-weight:700; color:var(--amber); text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                Scan with WhatsApp
+              </div>
+              <div class="qr-frame">
+                <img src="${data.qr_image}" alt="System32 WB Login QR">
+              </div>
+              <ol class="instructions-list">
+                <li>Open WhatsApp on your device</li>
+                <li>Go to <strong>Settings</strong> &rarr; <strong>Linked Devices</strong></li>
+                <li>Select <strong>Link a Device</strong> and point camera at this QR code</li>
+              </ol>
+            </div>
+          `;
+        } else {
+          dot.className = 'status-dot starting';
+          text.textContent = 'Initializing Kernel...';
+          container.innerHTML = `
+            <div class="connection-content">
+              <p style="font-size:13px; color:var(--text-muted);">
+                ${data.has_session ? 'Verifying session token...' : (data.pairing_number ? `Acquiring handshake code for ${data.pairing_number}...` : 'Preparing authentication handshake...')}
+              </p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error('Kernel status polling failed:', err);
+      }
+    }
+
+    pollStatus();
+    setInterval(pollStatus, 3000);
   </script>
 </body>
 </html>
