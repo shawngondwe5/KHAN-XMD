@@ -1,10 +1,6 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
-// Keep specialised sections out of the public menu.
-const HIDDEN_CATEGORIES = new Set(['audio', 'religion', 'islam', 'quran', 'channel', 'channels', 'staff', 'region']);
-const HIDDEN_COMMANDS = /^(quran|surah|surahmenu|quranmenu|ch|chreact|channel|channels|region|staff)$/i;
-
 const CATEGORY_LABELS = {
     ai: '✳️ AI & INTELLIGENCE',
     download: '↓ DOWNLOADS',
@@ -25,11 +21,9 @@ function buildMenu() {
     for (const command of commands) {
         if (!command || !command.pattern || command.dontAddCommandList) continue;
 
-        const pattern = String(command.pattern).trim();
         const category = String(command.category || 'misc').toLowerCase();
-        if (HIDDEN_CATEGORIES.has(category) || HIDDEN_COMMANDS.test(pattern)) continue;
         if (!groups.has(category)) groups.set(category, new Set());
-        groups.get(category).add(pattern);
+        groups.get(category).add(String(command.pattern).trim());
     }
 
     const sortedGroups = [...groups.entries()]
