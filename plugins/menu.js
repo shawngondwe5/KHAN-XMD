@@ -21,7 +21,7 @@ function shouldShowCommand(command) {
     if (!command || !command.pattern || command.dontAddCommandList) return false;
 
     const category = String(command.category || 'misc').trim();
-    if (HIDDEN_CATEGORIES.test(category.replace(/[\\s_-]/g, ''))) return false;
+    if (HIDDEN_CATEGORIES.test(category.replace(/[\s_-]/g, ''))) return false;
 
     const source = [
         command.pattern,
