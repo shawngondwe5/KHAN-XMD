@@ -1,25 +1,42 @@
 const config = require('../config');
 const { cmd, commands } = require('../command');
 
+// These features remain installed and usable; they are simply omitted from
+// the public command directory to keep .menu focused on the core bot.
+const HIDDEN_CATEGORIES = /^(?:audio|quran|islam|religion|religious|channel|channels|region|regions|staff|regional_staff)$/i;
+const HIDDEN_COMMAND = /(?:^|[._-])(forward(?:ed)?|audio|voice|quran|islam|religion|channel|channels|region|regions|staff)(?:$|[._-])/i;
+
 const CATEGORY_LABELS = {
     ai: '✳️ AI & INTELLIGENCE',
     download: '↓ DOWNLOADS',
     media: '▣ MEDIA',
-    audio: '♫ AUDIO',
     tools: '⌘ TOOLS',
     utility: '◇ UTILITIES',
     misc: '• GENERAL',
     group: '◎ GROUP',
     owner: '⚙️ OWNER',
-    religion: '☼ ARCHIVE',
-    islam: '☼ ARCHIVE',
 };
+
+function shouldShowCommand(command) {
+    if (!command || !command.pattern || command.dontAddCommandList) return false;
+
+    const category = String(command.category || 'misc').trim();
+    if (HIDDEN_CATEGORIES.test(category)) return false;
+
+    const source = [
+        command.pattern,
+        ...(Array.isArray(command.alias) ? command.alias : []),
+        command.filename ? require('path').basename(command.filename, '.js') : '',
+    ].join(' ');
+
+    return !HIDDEN_COMMAND.test(source);
+}
 
 function buildMenu() {
     const groups = new Map();
 
     for (const command of commands) {
-        if (!command || !command.pattern || command.dontAddCommandList) continue;
+        if (!shouldShowCommand(command)) continue;
 
         const category = String(command.category || 'misc').toLowerCase();
         if (!groups.has(category)) groups.set(category, new Set());
@@ -81,12 +98,12 @@ function buildMenu() {
 cmd({
     pattern: 'menu',
     alias: ['help', 'commands', 'list'],
-    desc: 'Show all available commands',
+    desc: 'Show the core command directory',
     category: 'utility',
     filename: __filename
 }, async (conn, mek, m, { from, reply }) => {
     try {
-        // Send text only; do not attach legacy KHAN-branded menu artwork.
+        // Text-only menu: no legacy forwarded audio or old menu artwork.
         return await conn.sendMessage(from, { text: buildMenu() }, { quoted: mek });
     } catch (error) {
         console.error('menu error:', error);
@@ -100,7 +117,7 @@ cmd({
     desc: 'Check if the bot is online',
     category: 'utility',
     filename: __filename
-}, async (conn, mek, m, { from, reply }) => {
+}, async (conn, mek, m, { reply }) => {
     const seconds = Math.floor(process.uptime());
     const days = Math.floor(seconds / 86400);
     const hours = Math.floor((seconds % 86400) / 3600);
@@ -132,6 +149,6 @@ cmd({
 }, async (conn, mek, m, { from }) => {
     const started = Date.now();
     await conn.sendMessage(from, {
-        text: `◈ *SYSTEM32 WB*  ·  PONG\nResponse time: ${Date.now() - started} ms`
+        text: `◈ *SYSTEM32 WB*  ·  PONG\\nResponse time: ${Date.now() - started} ms`
     }, { quoted: mek });
 });
