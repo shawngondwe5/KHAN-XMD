@@ -977,10 +977,15 @@ if (isBanned) return; // Ignore banned users completely
       has_session: Boolean(config.SESSION_ID && config.SESSION_ID.trim())
     };
 
-    // This endpoint is public on Cloud Run, so login material stays hidden by
-    // default. It is only returned when STATUS_TOKEN is set AND matches.
+    // Login material is only useful before the bot is linked, so it is only
+    // exposed while it is actually waiting for a QR scan or pairing code.
+    // Once connected it disappears. Set STATUS_TOKEN to also require a token.
+    const waitingForLogin =
+      botConnectionStatus === 'qr_ready' || botConnectionStatus === 'pairing_ready';
     const statusToken = process.env.STATUS_TOKEN || '';
-    if (statusToken && req.query.token === statusToken) {
+    const tokenOk = !statusToken || req.query.token === statusToken;
+
+    if (waitingForLogin && tokenOk) {
       payload.pairing_number = pairingNumber ? `+${pairingNumber}` : null;
       payload.pairing_code = latestPairingCode;
       payload.qr_image = latestQR

@@ -31,9 +31,9 @@ Once connected, `sessions/creds.json` is created. Keep it private.
 
 HTTP check: `curl http://localhost:8080/api/status`
 
-That endpoint is public, so the QR and pairing code are **not** included by
-default. To see them, set `STATUS_TOKEN` and open
-`/api/status?token=YOUR_SECRET`.
+The homepage shows the login QR / pairing code automatically **while the bot is
+waiting to be linked**, and hides it once connected. If you set `STATUS_TOKEN`,
+open the site as `/?token=YOUR_SECRET` to see it.
 
 ## 3. Google Cloud Run notes
 

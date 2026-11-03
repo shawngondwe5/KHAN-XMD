@@ -517,7 +517,9 @@
   <script>
     async function pollStatus() {
       try {
-        const res = await fetch('/api/status');
+        const statusToken = new URLSearchParams(location.search).get('token');
+        const url = '/api/status' + (statusToken ? '?token=' + encodeURIComponent(statusToken) : '');
+        const res = await fetch(url);
         const data = await res.json();
 
         document.getElementById('bot-name').textContent = data.bot_name || 'System32 WB';
