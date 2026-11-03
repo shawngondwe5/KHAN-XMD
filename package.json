@@ -11,7 +11,8 @@
     "start": "node index.js",
     "dev": "node index.js",
     "build": "echo 'Build complete'",
-    "check": "node --check index.js"
+    "check": "node scripts/check.js",
+    "test": "npm run check"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
