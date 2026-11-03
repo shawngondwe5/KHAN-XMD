@@ -50,7 +50,7 @@ const {
   // Exposed for vCard generation in conn.sendContact
   global.OwnerName = config.OWNER_NAME
   global.email = process.env.OWNER_EMAIL || ''
-  global.github = process.env.OWNER_GITHUB || 'JawadTechXD'
+  global.github = process.env.OWNER_GITHUB || 'shawngondwe5'
   global.location = process.env.OWNER_LOCATION || ''
 
   // In-memory message store (optional in some Baileys builds)
@@ -59,21 +59,6 @@ const {
     : { contacts: {}, loadMessage: async () => null }; 
 
   //=============================================
-  // Ensure image symlinks exist at filesystem root and app root
-  ['menu.jpg', 'logo.jpg', 'banner.jpg'].forEach(file => {
-      const assetPath = path.join(__dirname, 'assets', file);
-      if (fs.existsSync(assetPath)) {
-          try {
-              const rootPath = path.join('/', file);
-              if (!fs.existsSync(rootPath)) fs.symlinkSync(assetPath, rootPath);
-          } catch (_) {}
-          try {
-              const localPath = path.join(__dirname, file);
-              if (!fs.existsSync(localPath)) fs.symlinkSync(assetPath, localPath);
-          } catch (_) {}
-      }
-  });
-  
   const tempDir = path.join(os.tmpdir(), 'cache-temp');
   if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir, { recursive: true });
@@ -979,21 +964,31 @@ if (isBanned) return; // Ignore banned users completely
   app.use(express.static(path.join(__dirname, 'lib')));
 
   app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'assets', 'jawadtech.html'));
+    res.sendFile(path.join(__dirname, 'assets', 'index.html'));
   });
 
   app.get('/api/status', (req, res) => {
-    res.json({
+    const payload = {
       status: botConnectionStatus,
       bot_name: config.BOT_NAME || 'System32 WB',
       prefix: config.PREFIX || '.',
       mode: config.MODE || 'public',
       version: '5.0.0',
-      pairing_number: pairingNumber ? `+${pairingNumber}` : null,
-      pairing_code: latestPairingCode,
-      qr_image: latestQR ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(latestQR)}` : null,
       has_session: Boolean(config.SESSION_ID && config.SESSION_ID.trim())
-    });
+    };
+
+    // This endpoint is public on Cloud Run, so login material stays hidden by
+    // default. It is only returned when STATUS_TOKEN is set AND matches.
+    const statusToken = process.env.STATUS_TOKEN || '';
+    if (statusToken && req.query.token === statusToken) {
+      payload.pairing_number = pairingNumber ? `+${pairingNumber}` : null;
+      payload.pairing_code = latestPairingCode;
+      payload.qr_image = latestQR
+        ? `https://api.qrserver.com/v1/create-qr-code/?size=260x260&data=${encodeURIComponent(latestQR)}`
+        : null;
+    }
+
+    res.json(payload);
   });
 
   app.listen(port, '0.0.0.0', () => console.log(`Server listening on http://0.0.0.0:${port}`));

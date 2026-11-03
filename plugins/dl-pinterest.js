@@ -15,7 +15,7 @@ cmd({
     category: "download",
     use: ".pins <pinterest_url>",
     filename: __filename
-}, async (conn, m, mek, { from, q, reply }) => {
+}, async (conn, mek, m, { from, q, reply }) => {
     try {
         if (!q) return await reply("❌ Please provide a Pinterest URL!");
         
@@ -25,7 +25,7 @@ cmd({
         }
 
         // ⏳ React - processing
-        await conn.sendMessage(from, { react: { text: '⏳', key: m.key } });
+        await conn.sendMessage(from, { react: { text: '⏳', key: mek.key } });
         
         await reply("⏳ Please wait downloading...");
 

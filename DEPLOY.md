@@ -31,6 +31,10 @@ Once connected, `sessions/creds.json` is created. Keep it private.
 
 HTTP check: `curl http://localhost:8080/api/status`
 
+That endpoint is public, so the QR and pairing code are **not** included by
+default. To see them, set `STATUS_TOKEN` and open
+`/api/status?token=YOUR_SECRET`.
+
 ## 3. Google Cloud Run notes
 
 The GitHub repo is connected to Cloud Run, so **pushing to `main` redeploys**.
@@ -57,6 +61,7 @@ socket processes, so configure it carefully:
 | --- | --- |
 | `SESSION_ID` | MEGA file id with a saved `creds.json` |
 | `PAIRING_NUMBER` | Number for pairing-code login |
+| `STATUS_TOKEN` | Secret that unlocks QR/pairing code on `/api/status` |
 | `OWNER_NUMBER` | Bot owner's WhatsApp number |
 | `PREFIX` | Command prefix (default `.`) |
 | `MODE` | `public`, `private`, `inbox` or `group` |

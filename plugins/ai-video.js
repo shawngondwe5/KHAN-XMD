@@ -1,5 +1,5 @@
 /*
-Sora AI Video Generator Command for Khan MD
+Sora AI Video Generator Command for System32 WB
 Generates a short AI video from a text prompt using Okatsu API
 */
 
@@ -44,7 +44,7 @@ cmd({
         await conn.sendMessage(from, {
             video: { url: videoUrl },
             mimetype: 'video/mp4',
-            caption: `🎥 *Sora AI Video*\n\n📝 Prompt: ${input}\n\nPowered by *VORTEX-MD*`
+            caption: `🎥 *Sora AI Video*\n\n📝 Prompt: ${input}\n\nPowered by *System32 WB*`
         }, { quoted: mek });
 
     } catch (err) {

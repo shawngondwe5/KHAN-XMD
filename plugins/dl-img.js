@@ -39,7 +39,7 @@ cmd({
                 from,
                 { 
                     image: { url: image.url },
-                    caption: `*📷 Result for*: ${query}\n> *© Powered by VORTEX-MD*`
+                    caption: `*📷 Result for*: ${query}\n> *© Powered by System32 WB*`
                 },
                 { quoted: mek }
             );

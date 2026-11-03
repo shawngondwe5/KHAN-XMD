@@ -34,7 +34,7 @@ cmd({
       document: fileBuffer,
       fileName: data.fileName,
       mimetype: data.mimeType,
-      caption: `*MediaFire Download*\n\n📄 *Size:* ${data.size}\n\nPowered by VORTEX-MD`
+      caption: `*MediaFire Download*\n\n📄 *Size:* ${data.size}\n\nPowered by System32 WB`
     };
 
     await conn.sendMessage(from, messageOptions, { quoted: mek });

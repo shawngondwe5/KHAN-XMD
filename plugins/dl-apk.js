@@ -32,7 +32,7 @@ async (conn, mek, m, { from, q, reply }) => {
             document: { url: app.download_url },
             mimetype: app.mimetype || "application/vnd.android.package-archive",
             fileName: `${app.appname}.apk`,
-            caption: `✅ *APK successfully downloaded*\nPowered By VORTEX-MD 🤍`
+            caption: `✅ *APK successfully downloaded*\nPowered By System32 WB 🤍`
         }, { quoted: mek });
 
         // ✅ React - success

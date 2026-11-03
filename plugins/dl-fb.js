@@ -34,7 +34,7 @@ cmd({
 
     await conn.sendMessage(from, {
       video: { url: downloadLink },
-      caption: `> Powered By JawadTechX 💜`
+      caption: `> Powered By System32 WB`
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
@@ -82,7 +82,7 @@ cmd({
 
     await conn.sendMessage(from, {
       video: { url: video.url },
-      caption: `🎥 *Facebook Video Downloader*\n\n> Quality: ${video.quality}\n\n> Powered By JawadTechX 💜`
+      caption: `🎥 *Facebook Video Downloader*\n\n> Quality: ${video.quality}\n\n> Powered By System32 WB`
     }, { quoted: mek });
 
     await conn.sendMessage(from, { react: { text: '✅', key: m.key } });
