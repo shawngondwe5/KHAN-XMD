@@ -2,17 +2,17 @@ const config = require('../config');
 const { cmd, commands } = require('../command');
 
 const CATEGORY_LABELS = {
-    ai: '✳️  AI & INTELLIGENCE',
-    download: '↓  DOWNLOADS',
-    media: '▣  MEDIA',
-    audio: '♫  AUDIO',
-    tools: '⌘  TOOLS',
-    utility: '◇  UTILITIES',
-    misc: '•  GENERAL',
-    group: '◎  GROUP',
-    owner: '⚙️  OWNER',
-    religion: '☼  ARCHIVE',
-    islam: '☼  ARCHIVE',
+    ai: '✳️ AI & INTELLIGENCE',
+    download: '↓ DOWNLOADS',
+    media: '▣ MEDIA',
+    audio: '♫ AUDIO',
+    tools: '⌘ TOOLS',
+    utility: '◇ UTILITIES',
+    misc: '• GENERAL',
+    group: '◎ GROUP',
+    owner: '⚙️ OWNER',
+    religion: '☼ ARCHIVE',
+    islam: '☼ ARCHIVE',
 };
 
 function buildMenu() {
@@ -23,54 +23,57 @@ function buildMenu() {
 
         const category = String(command.category || 'misc').toLowerCase();
         if (!groups.has(category)) groups.set(category, new Set());
-        groups.get(category).add(command.pattern);
+        groups.get(category).add(String(command.pattern).trim());
     }
 
-    const total = [...groups.values()].reduce((count, patterns) => count + patterns.size, 0);
-    const botName = config.BOT_NAME || 'System32 WB';
+    const sortedGroups = [...groups.entries()]
+        .map(([category, patterns]) => [
+            category,
+            [...patterns].filter(Boolean).sort((a, b) => a.localeCompare(b)),
+        ])
+        .filter(([, patterns]) => patterns.length > 0)
+        .sort((a, b) => a[0].localeCompare(b[0]));
+
+    const total = sortedGroups.reduce((sum, [, patterns]) => sum + patterns.length, 0);
     const prefix = config.PREFIX || '.';
+    const botName = config.BOT_NAME || 'System32 WB';
     const mode = String(config.MODE || 'public').toUpperCase();
     const owner = config.OWNER_NAME || 'System Operator';
 
     const lines = [
-        '╭──────────────────────╮',
-        '       ◈  SYSTEM32 WB',
-        '      WHATSAPP KERNEL',
-        '╰──────────────────────╯',
+        '┏━━━━━━━━━━━━━━━━━━━━┓',
+        '     ◈ *SYSTEM32 WB*',
+        '      _WHATSAPP KERNEL_',
+        '┗━━━━━━━━━━━━━━━━━━━━┛',
         '',
-        'Hello. Your command centre is ready.',
+        '*YOUR COMMAND CENTRE*',
+        'A cleaner way to get things done.',
         '',
-        '┌  SYSTEM STATUS',
-        `│  Bot       · ${botName}`,
-        `│  Mode      · ${mode}`,
-        `│  Prefix    · ${prefix}`,
-        `│  Commands  · ${total}`,
-        `│  Operator  · ${owner}`,
-        '└──────────────────────',
+        '┌─ *SYSTEM OVERVIEW*',
+        `│  ◉ Bot: ${botName}`,
+        `│  ◉ Mode: ${mode}`,
+        `│  ◉ Prefix: ${prefix}`,
+        `│  ◉ Commands: ${total}`,
+        `│  ◉ Sections: ${sortedGroups.length}`,
+        `└─ Operator: ${owner}`,
         '',
-        '┌  COMMAND DIRECTORY',
+        '┌─ *COMMAND DIRECTORY*',
     ];
 
-    const sortedGroups = [...groups.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-
     for (const [category, patterns] of sortedGroups) {
-        const label = CATEGORY_LABELS[category] || `◇  ${category.toUpperCase()}`;
-        const commandsInCategory = [...patterns]
-            .sort((a, b) => a.localeCompare(b))
-            .map(pattern => `${prefix}${pattern}`);
-
+        const label = CATEGORY_LABELS[category] || `◇ ${category.toUpperCase()}`;
         lines.push('');
-        lines.push(label);
-        lines.push(commandsInCategory.join('   ·   '));
+        lines.push(`* ${label}  ·  ${patterns.length} *`);
+        lines.push(patterns.map(pattern => `  • ${prefix}${pattern}`).join('\n'));
     }
 
     lines.push('');
-    lines.push('└──────────────────────');
+    lines.push('└━━━━━━━━━━━━━━━━━━━━');
     lines.push('');
-    lines.push(`Type ${prefix}help for command guidance.`);
+    lines.push(`_Use ${prefix}help for command guidance._`);
     lines.push(config.DESCRIPTION || 'Built for a smoother WhatsApp experience.');
     lines.push('');
-    lines.push('       SYSTEM32 WB  ·  CORE');
+    lines.push('*SYSTEM32 WB*  ·  _CORE_');
 
     return lines.join('\n');
 }
@@ -83,6 +86,7 @@ cmd({
     filename: __filename
 }, async (conn, mek, m, { from, reply }) => {
     try {
+        // Send text only; do not attach legacy KHAN-branded menu artwork.
         return await conn.sendMessage(from, { text: buildMenu() }, { quoted: mek });
     } catch (error) {
         console.error('menu error:', error);
@@ -103,16 +107,15 @@ cmd({
     const minutes = Math.floor((seconds % 3600) / 60);
 
     const status = [
-        '╭──────────────────────╮',
-        '       ◈  SYSTEM32 WB',
-        '       CORE ONLINE',
-        '╰──────────────────────╯',
+        '┏━━━━━━━━━━━━━━━━━━━━┓',
+        '     ◈ *SYSTEM32 WB*',
+        '       _CORE ONLINE_',
+        '┗━━━━━━━━━━━━━━━━━━━━┛',
         '',
-        '┌  LIVE STATUS',
-        `│  Uptime  ·  ${days}d ${hours}h ${minutes}m`,
-        `│  Mode    ·  ${String(config.MODE || 'public').toUpperCase()}`,
-        `│  Prefix  ·  ${config.PREFIX || '.'}`,
-        '└──────────────────────',
+        '*LIVE STATUS*',
+        `◉ Uptime: ${days}d ${hours}h ${minutes}m`,
+        `◉ Mode: ${String(config.MODE || 'public').toUpperCase()}`,
+        `◉ Prefix: ${config.PREFIX || '.'}`,
         '',
         'All systems operational.'
     ].join('\n');
@@ -129,6 +132,6 @@ cmd({
 }, async (conn, mek, m, { from }) => {
     const started = Date.now();
     await conn.sendMessage(from, {
-        text: `◈  SYSTEM32 WB  ·  PONG\nResponse time: ${Date.now() - started} ms`
+        text: `◈ *SYSTEM32 WB*  ·  PONG\nResponse time: ${Date.now() - started} ms`
     }, { quoted: mek });
 });
