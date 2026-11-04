@@ -387,7 +387,7 @@ BotActivityFilter(conn);
   const normalizedBody = typeof body === 'string' ? body.trim() : '';
   const isCmd = Boolean(normalizedBody) && normalizedBody.startsWith(prefix);
   const budy = typeof mek.text === 'string' ? mek.text : normalizedBody;
-  const commandParts = isCmd ? normalizedBody.slice(prefix.length).trim().split(/\\s+/) : [];
+  const commandParts = isCmd ? normalizedBody.slice(prefix.length).trim().split(/\s+/) : [];
   const command = commandParts[0] ? commandParts[0].toLowerCase() : '';
   const args = commandParts.slice(1);
   const q = args.join(' ')
