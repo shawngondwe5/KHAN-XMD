@@ -41,7 +41,19 @@ const {
   const os = require('os')
   const Crypto = require('crypto')
   const path = require('path')
-  const prefix = config.PREFIX
+  const prefix = String(config.PREFIX || '.').trim() || '.'
+
+  // Optional data files must never crash the incoming-message handler.
+  const readJsonArray = (file) => {
+    try {
+      const value = JSON.parse(fs.readFileSync(path.join(__dirname, file), 'utf8'));
+      return Array.isArray(value) ? value : [];
+    } catch (error) {
+      console.error(`[DATA] Could not read ${file}: ${error.message}`);
+      return [];
+    }
+  };
+  const normalizeNumber = (value) => String(value || '').replace(/[^0-9]/g, '');
   // const { commands } = require('./command');
   const ownerNumber = [config.OWNER_NUMBER, config.DEV]
     .filter(Boolean)
@@ -372,23 +384,28 @@ BotActivityFilter(conn);
   const from = mek.key.remoteJid
   const quoted = type == 'extendedTextMessage' && mek.message.extendedTextMessage.contextInfo != null ? mek.message.extendedTextMessage.contextInfo.quotedMessage || [] : []
   const body = (type === 'conversation') ? mek.message.conversation : (type === 'extendedTextMessage') ? mek.message.extendedTextMessage.text : (type == 'imageMessage') && mek.message.imageMessage.caption ? mek.message.imageMessage.caption : (type == 'videoMessage') && mek.message.videoMessage.caption ? mek.message.videoMessage.caption : ''
-  const isCmd = body.startsWith(prefix)
-  var budy = typeof mek.text == 'string' ? mek.text : false;
-  const command = isCmd ? body.slice(prefix.length).trim().split(' ').shift().toLowerCase() : ''
-  const args = body.trim().split(/ +/).slice(1)
+  const normalizedBody = typeof body === 'string' ? body.trim() : '';
+  const isCmd = Boolean(normalizedBody) && normalizedBody.startsWith(prefix);
+  const budy = typeof mek.text === 'string' ? mek.text : normalizedBody;
+  const commandParts = isCmd ? normalizedBody.slice(prefix.length).trim().split(/\s+/) : [];
+  const command = commandParts[0] ? commandParts[0].toLowerCase() : '';
+  const args = commandParts.slice(1);
   const q = args.join(' ')
   const text = args.join(' ')
   const isGroup = from.endsWith('@g.us')
   const sender = mek.key.fromMe ? (conn.user.id.split(':')[0]+'@s.whatsapp.net' || conn.user.id) : (mek.key.participant || mek.key.remoteJid)
-  const senderNumber = sender.split('@')[0]
-  const botNumber = conn.user.id.split(':')[0]
+  const senderNumber = normalizeNumber(sender.split('@')[0]);
+  const botNumber = normalizeNumber(conn.user.id.split(':')[0]);
   const pushname = mek.pushName || 'Sin Nombre'
-  const isMe = botNumber.includes(senderNumber)
-  const isOwner = ownerNumber.includes(senderNumber) || isMe
+  const isMe = Boolean(senderNumber) && senderNumber === botNumber;
+  const isOwner = ownerNumber.includes(senderNumber) || isMe;
   const botNumber2 = await jidNormalizedUser(conn.user.id);
-  const groupMetadata = isGroup ? await conn.groupMetadata(from).catch(e => {}) : ''
-  const groupName = isGroup ? groupMetadata.subject : ''
-  const participants = isGroup ? await groupMetadata.participants : ''
+  const groupMetadata = isGroup ? await conn.groupMetadata(from).catch((error) => {
+    console.error('[GROUP] Could not load group metadata:', error?.message || error);
+    return null;
+  }) : null;
+  const groupName = groupMetadata?.subject || '';
+  const participants = groupMetadata?.participants || [];
   const groupAdmins = isGroup ? await getGroupAdmins(participants) : ''
   const isBotAdmins = isGroup ? groupAdmins.includes(botNumber2) : false
   const isAdmins = isGroup ? groupAdmins.includes(sender) : false
@@ -400,17 +417,15 @@ BotActivityFilter(conn);
   const udp = botNumber.split('@')[0];
     const jawadop = ('923103448168', '923427582273');
     
-    let ownerFilev2 = [];
-    try { ownerFilev2 = JSON.parse(fs.readFileSync('./assets/sudo.json', 'utf-8')); } catch (e) { ownerFilev2 = []; }
-    
-    let isCreator = [udp, config.DEV, config.OWNER_NUMBER, ...ownerFilev2]
-    .filter(Boolean)
-    .map(v => String(v).replace(/[^0-9]/g, '') + '@s.whatsapp.net') 
-    .includes(sender);
+    const ownerFilev2 = readJsonArray('assets/sudo.json');
+    const creatorNumbers = [udp, config.DEV, config.OWNER_NUMBER, ...ownerFilev2]
+      .map(normalizeNumber)
+      .filter(Boolean);
+    const isCreator = creatorNumbers.includes(senderNumber);
 	  
 
-	  if (isCreator && mek.text.startsWith("&")) {
-            let code = budy.slice(2);
+	  if (isCreator && normalizedBody.startsWith('&')) {
+            const code = normalizedBody.slice(1).trim();
             if (!code) {
                 reply(`Provide me with a query to run Master!`);
                 return;
@@ -496,57 +511,77 @@ if (!isReact && config.CUSTOM_REACT === 'true') {
 
 // ban users 
 
-const bannedUsers = JSON.parse(fs.readFileSync('./assets/ban.json', 'utf-8'));
-const isBanned = bannedUsers.includes(sender);
+const bannedUsers = readJsonArray('assets/ban.json');
+const isBanned = bannedUsers.some((value) => {
+  const banned = String(value || '').trim();
+  return banned === sender || normalizeNumber(banned.split('@')[0]) === senderNumber;
+});
 
 if (isBanned) return; // Ignore banned users completely
 	  
-  const ownerFile = JSON.parse(fs.readFileSync('./assets/sudo.json', 'utf-8'));  // خواندن فایل
-  const ownerNumberFormatted = `${String(config.OWNER_NUMBER).replace(/[^0-9]/g, '')}@s.whatsapp.net`;
-  // بررسی اینکه آیا فرستنده در owner.json موجود است
-  const isFileOwner = ownerFile.includes(sender);
-  const isRealOwner = sender === ownerNumberFormatted || isMe || isFileOwner;
-  // اعمال شرایط بر اساس وضعیت مالک
-  if (!isRealOwner && config.MODE === "private") return;
-  if (!isRealOwner && isGroup && config.MODE === "inbox") return;
-  if (!isRealOwner && !isGroup && (config.MODE === "group" || config.MODE === "groups")) return;
- 
-	  
-	  // take commands 
-                 
-  const events = require('./command')
-  const cmdName = isCmd ? command : false;
-  if (isCmd) {
-  const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))
-  if (cmd) {
-  if (cmd.react) conn.sendMessage(from, { react: { text: cmd.react, key: mek.key }})
-  
-  try {
-  cmd.function(conn, mek, m,{from, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply});
-  } catch (e) {
-  console.error("[PLUGIN ERROR] " + e);
-  }
-  }
-  }
-  events.commands.map(async(command) => {
-  if (body && command.on === "body") {
-  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
-  } else if (mek.q && command.on === "text") {
-  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
-  } else if (
-  (command.on === "image" || command.on === "photo") &&
-  mek.type === "imageMessage"
-  ) {
-  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
-  } else if (
-  command.on === "sticker" &&
-  mek.type === "stickerMessage"
-  ) {
-  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
-  }});
-  
+  const ownerFile = readJsonArray('assets/sudo.json');
+  const ownerNumberFormatted = `${normalizeNumber(config.OWNER_NUMBER)}@s.whatsapp.net`;
+  const isFileOwner = ownerFile.some((value) => {
+    const normalized = String(value || '').trim();
+    return normalized === sender || normalizeNumber(normalized.split('@')[0]) === senderNumber;
   });
-    //===================================================   
+  const isRealOwner = sender === ownerNumberFormatted || senderNumber === normalizeNumber(config.OWNER_NUMBER) || isMe || isFileOwner;
+  if (!isRealOwner && config.MODE === 'private') return;
+  if (!isRealOwner && isGroup && config.MODE === 'inbox') return;
+  if (!isRealOwner && !isGroup && (config.MODE === 'group' || config.MODE === 'groups')) return;
+
+  // Resolve and await commands so asynchronous plugin failures are caught.
+  const events = require('./command');
+  if (isCmd && command) {
+    const matchedCommand = events.commands.find((entry) =>
+      String(entry.pattern || '').toLowerCase() === command
+    ) || events.commands.find((entry) =>
+      Array.isArray(entry.alias) && entry.alias.some((alias) => String(alias).toLowerCase() === command)
+    );
+
+    if (matchedCommand && typeof matchedCommand.function === 'function') {
+      try {
+        if (matchedCommand.react) {
+          await conn.sendMessage(from, { react: { text: matchedCommand.react, key: mek.key } });
+        }
+        await matchedCommand.function(conn, mek, m, {
+          from, quoted, body: normalizedBody, isCmd, command, args, q, text, isGroup,
+          sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner,
+          isCreator, groupMetadata, groupName, participants, groupAdmins,
+          isBotAdmins, isAdmins, reply
+        });
+      } catch (error) {
+        console.error(`[PLUGIN ERROR] ${command}:`, error?.stack || error);
+        await reply('That command ran into an error. Please try again later.');
+      }
+    } else {
+      console.log(`[COMMAND] Unknown command: ${command}`);
+    }
+  }
+
+  // Event plugins run independently; one rejection cannot silently disappear.
+  for (const eventCommand of events.commands) {
+    if (typeof eventCommand.function !== 'function') continue;
+    let shouldRun = false;
+    if (normalizedBody && eventCommand.on === 'body') shouldRun = true;
+    else if (mek.q && eventCommand.on === 'text') shouldRun = true;
+    else if ((eventCommand.on === 'image' || eventCommand.on === 'photo') && type === 'imageMessage') shouldRun = true;
+    else if (eventCommand.on === 'sticker' && type === 'stickerMessage') shouldRun = true;
+    if (!shouldRun) continue;
+
+    try {
+      await eventCommand.function(conn, mek, m, {
+        from, l, quoted, body: normalizedBody, isCmd, command, args, q, text,
+        isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe,
+        isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins,
+        isBotAdmins, isAdmins, reply
+      });
+    } catch (error) {
+      console.error(`[EVENT PLUGIN ERROR] ${eventCommand.filename || 'unknown'}:`, error?.stack || error);
+    }
+  }
+
+  });
     conn.decodeJid = jid => {
       if (!jid) return jid;
       if (/:\d+@/gi.test(jid)) {
