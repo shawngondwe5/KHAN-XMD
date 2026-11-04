@@ -525,7 +525,7 @@ if (isBanned) return; // Ignore banned users completely
     const normalized = String(value || '').trim();
     return normalized === sender || normalizeNumber(normalized.split('@')[0]) === senderNumber;
   });
-  const isRealOwner = sender === ownerNumberFormatted || isMe || isFileOwner;
+  const isRealOwner = sender === ownerNumberFormatted || senderNumber === normalizeNumber(config.OWNER_NUMBER) || isMe || isFileOwner;
   if (!isRealOwner && config.MODE === 'private') return;
   if (!isRealOwner && isGroup && config.MODE === 'inbox') return;
   if (!isRealOwner && !isGroup && (config.MODE === 'group' || config.MODE === 'groups')) return;
